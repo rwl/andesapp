@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Andes</title>
+  <link rel="shortcut icon" href="#">
+  <script type="text/javascript">
+    // Set the Pyodide files URL (packages.json, pyodide.asm.data etc).
+    window.languagePluginUrl = '/pyodide/';
+  </script>
+  <script src="/pyodide/pyodide.js"></script>
+  <script src="/pyodide/cases.asm.data.js"></script>
+  <script src="/pyodide/andes.asm.data.js"></script>
+</head>
+<body>
+<h3>Andes</h3>
+
+<label for="casename">Case:</label>
+<select id="casename" disabled="disabled">
+  <option value="pjm5bus">PJM 5</option>
+  <option value="ieee14_fault">IEEE 14 (Fault)</option>
+  <option value="kundur_full">Kundur (Full)</option>
+</select>
+
+<button id="pf" type="button" disabled>PF</button>
+<button id="tds" type="button" disabled>TDS</button>
+
+<pre id="output"></pre>
+
+<script type="text/javascript">
+  var caseSelect = document.getElementById("casename");
+  var pfButton = document.getElementById("pf");
+  var tdsButton = document.getElementById("tds");
+  var outputPre = document.getElementById("output");
+
+  function onPrepared() {
+    caseSelect.removeAttribute("disabled");
+    pfButton.removeAttribute("disabled");
+    tdsButton.removeAttribute("disabled");
+  }
+
+
+  languagePluginLoader.then(function () {
+    outputPre.innerText = "Loading packages...";
+
+    pyodide.loadPackage(['numpy', 'sympy', 'mpmath', 'kvxopt', 'dill', 'tqdm', 'andes']).then(() => {
+      new Promise((resolve, reject) => {
+        outputPre.innerText = 'Preparing models...';
+        resolve();
+      }).then(() => {
+        pyodide.runPythonAsync(`
+import io
+import logging
+from andes.main import config_logger
+from andes.system import System
+
+config_logger(file=False, stream_level=10)
+
+lg = logging.getLogger('andes')
+stream = io.StringIO()
+sh = logging.StreamHandler(stream)
+lg.addHandler(sh)
+
+system = System()
+system.prepare(quick=True, incremental=True)
+
+stream.getvalue()
+              `)
+          .then(output => {
+            outputPre.innerText = output;
+            onPrepared();
+          })
+          .catch((err) => {
+            outputPre.innerText = err
+          });
+      });
+
+      pfButton.onclick = () => {
+        new Promise((resolve, reject) => {
+          outputPre.innerText = 'Running power flow...';
+          resolve();
+        }).then(() => {
+          pyodide.runPythonAsync(`
+#from andes.system import System
+from andes.io import parse
+
+stream.truncate(0)
+
+#system = System('/cases/` + caseSelect.value + `.json')
+#parse(system)
+#system.setup()
+
+#if system.is_setup:
+#  system.reset()
+system.reload('/cases/` + caseSelect.value + `.json')
+system.PFlow.run()
+
+stream.getvalue()
+          `)
+            .then(output => {
+              outputPre.innerText = output
+            })
+            .catch((err) => {
+              outputPre.innerText = err
+            });
+        });
+      };
+
+      tdsButton.onclick = () => {
+        outputPre.innerText = 'Running time domain simulation...';
+
+        pyodide.runPythonAsync(`
+#from andes.system import System
+from andes.io import parse
+
+stream.truncate(0)
+
+#system = System('/cases/` + caseSelect.value + `.json')
+#parse(system)
+#system.setup()
+
+#if system.is_setup:
+#  system.reset()
+system.reload('/cases/` + caseSelect.value + `.json')
+system.PFlow.run()
+system.TDS.run()
+
+stream.getvalue()
+        `)
+          .then(output => { outputPre.innerText = output })
+          .catch((err) => { outputPre.innerText = err });
+      };
+    });
+
+    /*pyodide.loadPackage(['numpy', 'sympy', 'mpmath', 'kvxopt', 'dill', 'tqdm', 'andes']).then(() => {
+      console.log(pyodide.runPython(`
+#from kvxopt import matrix, spmatrix, sparse, spdiag
+#from kvxopt.amd import order
+#from kvxopt.umfpack import linsolve
+#from kvxopt import umfpack
+#from kvxopt import klu
+#from kvxopt import mul, div
+#from kvxopt.lapack import gesv
+
+#V = [2, 3, 3, -1, 4, 4, -3, 1, 2, 2, 6, 1]
+#I = [0, 1, 0,  2, 4, 1,  2, 3, 4, 2, 1, 4]
+#J = [0, 0, 1,  1, 1, 2,  2, 2, 2, 3, 4, 4]
+#A = spmatrix(V,I,J)
+#B = matrix(1.0, (5,1))
+#print(A)
+#print(B)
+#umfpack.linsolve(A,B)
+#print(B)
+
+#A = spmatrix(V,I,J)
+#B = matrix(1.0, (5,1))
+#klu.linsolve(A,B)
+#print(B)
+
+#from kvxopt import amd
+#print(amd)
+#A = spmatrix([10,3,5,-2,5,2], [0,2,1,2,2,3], [0,0,1,1,2,3])
+#P = amd.order(A)
+#print(P)
+
+
+from andes.main import config_logger
+#run('/cases/kundur_full.json', codegen=True)
+
+from andes.system import System
+#from andes.io import json as jsonio
+from andes.io import parse
+#from andes.routines.pflow import PFlow
+#from andes.routines.tds import TDS
+
+config_logger(file=False, stream_level=10)
+
+system = System('/cases/kundur_full.json')
+#jsonio.read(sys, '/cases/kundur_full.json')
+
+system.prepare(quick=True, incremental=True)
+#system.undill()
+
+#from os import listdir
+#print(listdir('/home/web_user/.andes'))
+
+parse(system)
+system.setup()
+system.PFlow.run()
+system.TDS.run()
+              `));
+    });*/
+  });
+</script>
+</body>
+</html>

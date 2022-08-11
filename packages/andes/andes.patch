@@ -1,0 +1,105 @@
+diff -Naur a/andes/core/model.py b/andes/core/model.py
+--- a/andes/core/model.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/core/model.py	2021-04-16 12:59:44.151276802 +0200
+@@ -12,7 +12,6 @@
+ #  Last modified: 8/16/20, 7:27 PM
+ 
+ import logging
+-import scipy as sp
+ 
+ from collections import OrderedDict
+ from typing import Iterable, Sized, Callable, Union
+diff -Naur a/andes/core/solver.py b/andes/core/solver.py
+--- a/andes/core/solver.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/core/solver.py	2021-04-15 10:19:44.034012059 +0200
+@@ -4,8 +4,8 @@
+ 
+ import logging
+ 
+-from scipy.sparse import csc_matrix
+-from scipy.sparse.linalg import spsolve
++# from scipy.sparse import csc_matrix
++# from scipy.sparse.linalg import spsolve
+ from andes.shared import np, matrix, umfpack, klu, cupy
+ 
+ logger = logging.getLogger(__name__)
+diff -Naur a/andes/main.py b/andes/main.py
+--- a/andes/main.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/main.py	2021-04-15 10:19:44.034012059 +0200
+@@ -29,7 +29,7 @@
+ from andes.routines import routine_cli
+ from andes.utils.misc import elapsed, is_interactive
+ from andes.utils.paths import get_config_path, tests_root, get_log_dir
+-from andes.shared import coloredlogs, unittest
++# from andes.shared import coloredlogs, unittest
+ from andes.shared import Pool, Process
+ 
+ logger = logging.getLogger(__name__)
+diff -Naur a/andes/routines/eig.py b/andes/routines/eig.py
+--- a/andes/routines/eig.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/routines/eig.py	2021-04-15 10:19:44.034012059 +0200
+@@ -3,7 +3,7 @@
+ """
+ 
+ import logging
+-import scipy.io
++# import scipy.io
+ import numpy as np
+ 
+ from math import ceil, pi
+diff -Naur a/andes/shared.py b/andes/shared.py
+--- a/andes/shared.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/shared.py	2021-04-15 10:19:44.034012059 +0200
+@@ -12,11 +12,11 @@
+ 
+ import math
+ import os
+-import coloredlogs         # NOQA
++# import coloredlogs         # NOQA
+ import numpy as np         # NOQA
+ 
+ from andes.utils.lazyimport import LazyImport
+-from distutils.spawn import find_executable
++# from distutils.spawn import find_executable
+ 
+ # Library preference:
+ # KVXOPT + ipadd > CVXOPT + ipadd > KXVOPT > CVXOPT (+ KLU or not)
+diff -Naur a/andes/utils/paths.py b/andes/utils/paths.py
+--- a/andes/utils/paths.py	2021-03-21 16:00:35.000000000 +0100
++++ b/andes/utils/paths.py	2021-04-15 11:10:31.134064356 +0200
+@@ -2,7 +2,7 @@
+ Utility functions for loading andes stock test cases
+ """
+ import os
+-import platform
++# import platform
+ import tempfile
+ import pathlib
+ import logging
+@@ -219,13 +219,7 @@
+     str
+         The path to the temporary logging directory
+     """
+-    path = ''
+-    if platform.system() in ('Linux', 'Darwin'):
+-        path = tempfile.mkdtemp(prefix='andes-')
+-
+-    elif platform.system() == 'Windows':
+-        appdata = os.getenv('APPDATA')
+-        path = os.path.join(appdata, 'andes')
++    path = tempfile.mkdtemp(prefix='andes-')
+ 
+     if not os.path.exists(path):
+         os.makedirs(path)
+diff -Naur a/setup.py b/setup.py
+--- a/setup.py	2021-03-21 16:00:35.000000000 +0100
++++ b/setup.py	2021-04-15 10:19:44.034012059 +0200
+@@ -56,7 +56,7 @@
+             # 'path/to/data_file',
+         ]
+     },
+-    install_requires=requirements,
++    # install_requires=requirements,
+     license="GNU Public License v3",
+     classifiers=[
+         'Development Status :: 4 - Beta',

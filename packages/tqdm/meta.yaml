@@ -1,0 +1,9 @@
+package:
+  name: tqdm
+  version: 4.60.0
+source:
+  sha256: ebdebdb95e3477ceea267decfc0784859aa3df3e27e22d23b83e9b272bf157ae
+  url: https://files.pythonhosted.org/packages/35/35/bd5af89c97ad5177ed234d9e79d01a984f8b5226b8ffc8b5d3c4fc8e157d/tqdm-4.60.0.tar.gz
+test:
+  imports:
+    - tqdm

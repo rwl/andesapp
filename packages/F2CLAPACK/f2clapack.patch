@@ -1,0 +1,167 @@
+diff -Naur a/BLAS/SRC/xerbla.c b/BLAS/SRC/xerbla.c
+--- a/BLAS/SRC/xerbla.c	2010-04-27 21:23:16.000000000 +0200
++++ b/BLAS/SRC/xerbla.c	2021-03-25 19:58:44.754892352 +0100
+@@ -10,6 +10,8 @@
+ 		http://www.netlib.org/f2c/libf2c.zip
+ */
+ 
++#include <stdio.h>
++
+ #include "f2c.h"
+ #include "blaswrap.h"
+ 
+diff -Naur a/F2CLIBS/libf2c/ef1asc_.c b/F2CLIBS/libf2c/ef1asc_.c
+--- a/F2CLIBS/libf2c/ef1asc_.c	2009-08-08 00:32:18.000000000 +0200
++++ b/F2CLIBS/libf2c/ef1asc_.c	2021-03-25 20:05:18.970632776 +0100
+@@ -13,7 +13,7 @@
+ extern VOID s_copy();
+ ef1asc_(a, la, b, lb) ftnint *a, *b; ftnlen *la, *lb;
+ #else
+-extern void s_copy(char*,char*,ftnlen,ftnlen);
++extern int s_copy(char*,char*,ftnlen,ftnlen);
+ int ef1asc_(ftnint *a, ftnlen *la, ftnint *b, ftnlen *lb)
+ #endif
+ {
+diff -Naur a/F2CLIBS/libf2c/f2ch.add b/F2CLIBS/libf2c/f2ch.add
+--- a/F2CLIBS/libf2c/f2ch.add	2009-08-08 00:32:18.000000000 +0200
++++ b/F2CLIBS/libf2c/f2ch.add	2021-03-25 20:05:18.970632776 +0100
+@@ -124,9 +124,9 @@
+ extern double r_sqrt(float *);
+ extern double r_tan(float *);
+ extern double r_tanh(float *);
+-extern void s_cat(char *, char **, integer *, integer *, ftnlen);
++extern int s_cat(char *, char **, integer *, integer *, ftnlen);
+ extern integer s_cmp(char *, char *, ftnlen, ftnlen);
+-extern void s_copy(char *, char *, ftnlen, ftnlen);
++extern int s_copy(char *, char *, ftnlen, ftnlen);
+ extern int s_paus(char *, ftnlen);
+ extern integer s_rdfe(cilist *);
+ extern integer s_rdue(cilist *);
+diff -Naur a/F2CLIBS/libf2c/Makefile b/F2CLIBS/libf2c/Makefile
+--- a/F2CLIBS/libf2c/Makefile	2010-04-27 21:09:35.000000000 +0200
++++ b/F2CLIBS/libf2c/Makefile	2021-04-08 15:33:03.414480609 +0200
+@@ -20,14 +20,12 @@
+ # compile, then strip unnecessary symbols
+ .c.o:
+ 	$(CC) -c -DSkip_f2c_Undefs $(CFLAGS) $*.c
+-	ld -r -x -o $*.xxx $*.o
+-	mv $*.xxx $*.o
+ ## Under Solaris (and other systems that do not understand ld -x),
+ ## omit -x in the ld line above.
+ ## If your system does not have the ld command, comment out
+ ## or remove both the ld and mv lines above.
+ 
+-MISC =	f77vers.o i77vers.o main.o s_rnge.o abort_.o exit_.o getarg_.o iargc_.o\
++MISC =	f77vers.o i77vers.o s_rnge.o abort_.o exit_.o getarg_.o iargc_.o\
+ 	getenv_.o signal_.o s_stop.o s_paus.o system_.o cabs.o ctype.o\
+ 	derf_.o derfc_.o erf_.o erfc_.o sig_die.o uninit.o
+ POW =	pow_ci.o pow_dd.o pow_di.o pow_hh.o pow_ii.o pow_ri.o pow_zi.o pow_zz.o
+@@ -72,8 +70,8 @@
+ all: f2c.h signal1.h sysdep1.h libf2c.a clapack_install
+ 
+ libf2c.a: $(OFILES)
+-	ar r libf2c.a $?
+-	-ranlib libf2c.a
++	$(ARCH) r libf2c.a $?
++	$(RANLIB) libf2c.a
+ 
+ ## Shared-library variant: the following rule works on Linux
+ ## systems.  Details are system-dependent.  Under Linux, -fPIC
+@@ -119,7 +117,7 @@
+ 
+ install: libf2c.a
+ 	cp libf2c.a $(LIBDIR)
+-	-ranlib $(LIBDIR)/libf2c.a
++	$(RANLIB) $(LIBDIR)/libf2c.a
+ 
+ clapack_install: libf2c.a
+ 	mv libf2c.a ..
+@@ -184,8 +182,8 @@
+ arith.h: arithchk.c
+ 	$(CC) $(CFLAGS) -DNO_FPINIT arithchk.c -lm ||\
+ 	 $(CC) -DNO_LONG_LONG $(CFLAGS) -DNO_FPINIT arithchk.c -lm
+-	./a.out >arith.h
+-	rm -f a.out arithchk.o
++	node a.out.js >arith.h
++	rm -f a.out.js a.out.wasm
+ 
+ check:
+ 	xsum Notice README abort_.c arithchk.c backspac.c c_abs.c c_cos.c \
+diff -Naur a/INSTALL/tstiee.c b/INSTALL/tstiee.c
+--- a/INSTALL/tstiee.c	2009-08-08 00:32:18.000000000 +0200
++++ b/INSTALL/tstiee.c	2021-03-25 19:58:44.754892352 +0100
+@@ -10,6 +10,8 @@
+ 		http://www.netlib.org/f2c/libf2c.zip
+ */
+ 
++#include <string.h>
++
+ #include "f2c.h"
+ #include "blaswrap.h"
+ 
+diff -Naur a/Makefile b/Makefile
+--- a/Makefile	2021-04-13 19:33:04.300487374 +0200
++++ b/Makefile	2021-04-13 19:33:04.320487362 +0200
+@@ -15,9 +15,8 @@
+ 
+ clean: cleanlib cleantesting cleanblas_testing 
+ 
+-lapack_install:
+-	( cd INSTALL; $(MAKE); ./testlsame; ./testslamch; \
+-	  ./testdlamch; ./testsecond; ./testdsecnd; ./testversion )
++lapack_install: f2clib
++	( cd INSTALL; $(MAKE) )
+ 
+ blaslib:
+ 	( cd BLAS/SRC; $(MAKE) )
+diff -Naur a/SRC/Makefile b/SRC/Makefile
+--- a/SRC/Makefile	2010-04-27 21:09:35.000000000 +0200
++++ b/SRC/Makefile	2021-04-08 15:43:54.616133123 +0200
+@@ -50,9 +50,9 @@
+ #
+ #######################################################################
+ 
+-ALLAUX = maxloc.o ilaenv.o ieeeck.o lsamen.o xerbla.o xerbla_array.o iparmq.o	\
++ALLAUX = maxloc.o ilaenv.o ieeeck.o lsamen.o iparmq.o	\
+     ilaprec.o ilatrans.o ilauplo.o iladiag.o chla_transtype.o \
+-    ../INSTALL/ilaver.o ../INSTALL/lsame.o
++    ../INSTALL/ilaver.o
+ 
+ ALLXAUX =
+ 
+@@ -104,7 +104,7 @@
+    sggrqf.o sggsvd.o sggsvp.o sgtcon.o sgtrfs.o sgtsv.o  \
+    sgtsvx.o sgttrf.o sgttrs.o sgtts2.o shgeqz.o \
+    shsein.o shseqr.o slabrd.o slacon.o slacn2.o \
+-   slaein.o slaexc.o slag2.o  slags2.o slagtm.o slagv2.o slahqr.o \
++   slaein.o slaexc.o slag2.o  slags2.o slagtm.o slagv2.o \
+    slahrd.o slahr2.o slaic1.o slaln2.o slals0.o slalsa.o slalsd.o \
+    slangb.o slange.o slangt.o slanhs.o slansb.o slansp.o \
+    slansy.o slantb.o slantp.o slantr.o slanv2.o \
+@@ -176,7 +176,7 @@
+    clacgv.o clacon.o clacn2.o clacp2.o clacpy.o clacrm.o clacrt.o cladiv.o \
+    claed0.o claed7.o claed8.o \
+    claein.o claesy.o claev2.o clags2.o clagtm.o \
+-   clahef.o clahqr.o \
++   clahef.o \
+    clahrd.o clahr2.o claic1.o clals0.o clalsa.o clalsd.o clangb.o clange.o clangt.o \
+    clanhb.o clanhe.o \
+    clanhp.o clanhs.o clanht.o clansb.o clansp.o clansy.o clantb.o \
+@@ -236,7 +236,7 @@
+    dggrqf.o dggsvd.o dggsvp.o dgtcon.o dgtrfs.o dgtsv.o  \
+    dgtsvx.o dgttrf.o dgttrs.o dgtts2.o dhgeqz.o \
+    dhsein.o dhseqr.o dlabrd.o dlacon.o dlacn2.o \
+-   dlaein.o dlaexc.o dlag2.o  dlags2.o dlagtm.o dlagv2.o dlahqr.o \
++   dlaein.o dlaexc.o dlag2.o  dlags2.o dlagtm.o dlagv2.o \
+    dlahrd.o dlahr2.o dlaic1.o dlaln2.o dlals0.o dlalsa.o dlalsd.o \
+    dlangb.o dlange.o dlangt.o dlanhs.o dlansb.o dlansp.o \
+    dlansy.o dlantb.o dlantp.o dlantr.o dlanv2.o \
+@@ -310,7 +310,7 @@
+    zlacgv.o zlacon.o zlacn2.o zlacp2.o zlacpy.o zlacrm.o zlacrt.o zladiv.o \
+    zlaed0.o zlaed7.o zlaed8.o \
+    zlaein.o zlaesy.o zlaev2.o zlags2.o zlagtm.o \
+-   zlahef.o zlahqr.o \
++   zlahef.o \
+    zlahrd.o zlahr2.o zlaic1.o zlals0.o zlalsa.o zlalsd.o zlangb.o zlange.o \
+    zlangt.o zlanhb.o \
+    zlanhe.o \

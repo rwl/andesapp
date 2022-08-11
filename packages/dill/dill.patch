@@ -1,0 +1,19 @@
+diff -Naur a/dill/_dill.py b/dill/_dill.py
+--- a/dill/_dill.py	2020-08-25 10:22:36.000000000 +0200
++++ b/dill/_dill.py	2021-04-13 14:24:02.101956995 +0200
+@@ -207,13 +207,13 @@
+ 
+ FileType = get_file_type('rb', buffering=0)
+ TextWrapperType = get_file_type('r', buffering=-1)
+-BufferedRandomType = get_file_type('r+b', buffering=-1)
++BufferedRandomType = get_file_type('r+b', buffering=0)
+ BufferedReaderType = get_file_type('rb', buffering=-1)
+ BufferedWriterType = get_file_type('wb', buffering=-1)
+ try:
+     from _pyio import open as _open
+     PyTextWrapperType = get_file_type('r', buffering=-1, open=_open)
+-    PyBufferedRandomType = get_file_type('r+b', buffering=-1, open=_open)
++    PyBufferedRandomType = get_file_type('r+b', buffering=0, open=_open)
+     PyBufferedReaderType = get_file_type('rb', buffering=-1, open=_open)
+     PyBufferedWriterType = get_file_type('wb', buffering=-1, open=_open)
+ except ImportError:

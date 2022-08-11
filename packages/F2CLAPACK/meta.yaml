@@ -1,0 +1,5 @@
+package:
+  name: F2CLAPACK
+  version: 3.2.1
+build:
+  library: true

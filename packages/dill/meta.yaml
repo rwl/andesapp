@@ -1,0 +1,11 @@
+package:
+  name: dill
+  version: 0.3.3
+source:
+  sha256: efb7f6cb65dba7087c1e111bb5390291ba3616741f96840bfc75792a1a9b5ded
+  url: https://files.pythonhosted.org/packages/0d/5a/0534e0eb113be5635a6bd5e8b22ddf780cf977a403155fd4e07e6b92fb3d/dill-0.3.3.zip
+  patches:
+    - dill.patch
+test:
+  imports:
+    - dill

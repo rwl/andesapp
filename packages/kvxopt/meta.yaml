@@ -1,0 +1,23 @@
+package:
+  name: kvxopt
+  version: 1.2.6.0
+source:
+  sha256: b67430a7434ce2eee94da217059d6f2903ed1930a29370cc479b559699cd0ff0
+  url: https://files.pythonhosted.org/packages/52/61/e33d976e1954d18f8543a944ac6dc85899523739814aa01628f3a437ab06/kvxopt-1.2.6.0.tar.gz
+  patches:
+    - kvxopt.patch
+requirements:
+  run:
+    - F2CLAPACK
+    - SuiteSparse
+test:
+  imports:
+    - kvxopt
+    - kvxopt.amd
+    - kvxopt.base
+    - kvxopt.blas
+    - kvxopt.dense
+    - kvxopt.klu
+    - kvxopt.lapack
+    - kvxopt.sparse
+    - kvxopt.umfpack

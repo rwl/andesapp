@@ -1,0 +1,25 @@
+diff -Naur a/setup.py b/setup.py
+--- a/setup.py	2020-11-01 20:06:27.000000000 +0100
++++ b/setup.py	2021-04-13 15:15:42.804671229 +0200
+@@ -7,10 +7,10 @@
+ from distutils.file_util import copy_file
+ 
+ # Modifiy this if BLAS and LAPACK libraries are not in /usr/lib.
+-BLAS_LIB_DIR = '/usr/lib'
++BLAS_LIB_DIR = '../../../F2CLAPACK/F2CLAPACK_WA'
+ 
+ # Default names of BLAS and LAPACK libraries
+-BLAS_LIB = ['blas']
++BLAS_LIB = ['blas', 'f2c']
+ LAPACK_LIB = ['lapack']
+ BLAS_EXTRA_LINK_ARGS = []
+ 
+@@ -82,7 +82,7 @@
+     FFTW_MACROS = []
+ 
+ # Directory containing SuiteSparse source
+-SUITESPARSE_SRC_DIR = ''
++SUITESPARSE_SRC_DIR = '../../../SuiteSparse/SuiteSparse-WA'
+ 
+ # For SuiteSparse Versions before to 4.0.0 SuiteSparse_config does not exist
+ # We can avoid the search and link with this flag

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>calls.pkl</title>
+  <link rel="shortcut icon" href="#">
+  <script type="text/javascript">
+    window.languagePluginUrl = '/pyodide/';
+  </script>
+  <script src="/pyodide/pyodide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+Andes calls.pkl page <br>
+Open your browser console to see output
+<script type="text/javascript">
+  languagePluginLoader.then(function () {
+    pyodide.loadPackage(['numpy', 'sympy', 'mpmath', 'kvxopt', 'dill', 'andes']).then(() => {
+      console.log(pyodide.runPython(`
+import shutil
+
+from andes.main import config_logger
+
+from andes.system import System
+from andes.io import parse
+
+config_logger(file=False, stream_level=10)
+
+system = System()
+system.prepare(quick=True)
+
+
+calls_fd = open('/home/web_user/.andes/calls.pkl', 'rb')
+calls = calls_fd.read()
+calls_fd.close()
+
+
+shutil.make_archive('/tmp/pycode', 'zip', '/home/web_user/.andes/pycode')
+
+pycode_fd = open('/tmp/pycode.zip', 'rb')
+pycode = pycode_fd.read()
+pycode_fd.close()
+              `));
+      var calls = pyodide.globals["calls"];
+      var blob = new Blob([calls], {type: "application/octet-stream"});
+      saveAs(blob, "calls.pkl");
+
+      var pycode = pyodide.globals["pycode"];
+      var blob2 = new Blob([pycode], {type: "application/octet-stream"});
+      saveAs(blob2, "pycode.zip");
+    });
+  });
+</script>
+</body>
+</html>

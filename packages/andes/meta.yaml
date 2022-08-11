@@ -1,0 +1,21 @@
+package:
+  name: andes
+  version: 1.3.5
+source:
+  sha256: 61ba8661ae4916b2b74c3c38a16c5effb6b4ba04b04b74167f411762d54371c0
+  url: https://files.pythonhosted.org/packages/c2/bc/ba99f75f054de5e4535f3fb0066c4dbfd3a2e0db2d7f0da754014bf1584e/andes-1.3.5.tar.gz
+  patches:
+    - andes.patch
+#requirements:
+#  run:
+#    - kvxopt
+#    - dill
+#    - tqdm
+test:
+  imports:
+    - andes
+    - andes.cases
+    - andes.io
+    - andes.models
+    - andes.routines
+    - andes.system
